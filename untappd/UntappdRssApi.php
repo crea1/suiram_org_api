@@ -1,14 +1,27 @@
 <?php
 class UntappdRssApi {
-	private $rss_url = 'https://untappd.com/rss/user/crea1?key=304cd4ac3b0ae27c65ac50a0ba4789d7';
 	
+	function __construct($rss_url, $cache_expire_seconds) {
+		$this->rss_url = $rss_url;
+		$this->cache_expire_seconds = $cache_expire_seconds;
+	}
+
 	## Start method
 	public function serve() {
-		$rss_feed = simplexml_load_file($this->rss_url);
+		$beers = null;
+		if ($this->cache_expire_seconds > 0) {
+			$beers = $this->get_beers_from_cache();
+		}
+		if ($beers == null) {
+			$rss_feed = simplexml_load_file($this->rss_url);
+			$beers = $this->get_all_beers($rss_feed);
+		}
 
 		# Return result
 		header('Content-type: application/json');
-		print json_encode($this->get_all_beers($rss_feed));
+		print json_encode($beers);
+
+		$this->write_cachefile($beers);
 	}
 
 	## Get latest
@@ -46,8 +59,35 @@ class UntappdRssApi {
 		return $array;
 	}
 
+	private function write_cachefile($beers) {
+		$cache_array = array("beers"=>$beers, "timestamp"=>time());
+		$cache_file = fopen("rss_feed_cache.xml", "w") or die("unable to open cache file");
+		fwrite($cache_file, json_encode($cache_array));
+		fclose($cache_file);
+	}
+
+	private function read_cachefile() {
+		if (file_exists("rss_feed_cache.xml")) {
+			$cache_file = fopen("rss_feed_cache.xml", "r");
+			$cache = json_decode(fread($cache_file, filesize("rss_feed_cache.xml")), true);
+			fclose($cache_file);
+			return $cache;
+		} else {
+			return null;
+		}
+
+	}
+
+	## Get beers from cache if not expired
+	private function get_beers_from_cache() {
+		$cache = $this->read_cachefile();
+		if ($cache != null && time() - $cache['timestamp'] < $this->cache_expire_seconds) {
+			return $cache['beers'];
+		} else {
+			return null;
+		}
+	}
+
 
 }
-$untappd_rss_api = new UntappdRssApi();
-$untappd_rss_api->serve(); 
 ?>
