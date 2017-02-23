@@ -42,13 +42,13 @@ class UntappdRssApi {
 	## Extract beer and brewery from title
 	private function item_to_array($item) {
 		# /^.*an? (.*)\s\bby\b\s*(.*)(\s\bat\b|$)/
-		# ^.*an?       - Matches "Marius K. is drinking a" or ".. an"
+		# ^.*drinking an?       - Matches "Marius K. is drinking a" or ".. an"
 		# (.*)         - Gets the beer
 		# \s\bby\b\s*  - Matches " by  "
 		# (.*)         - Gets the brewery, which should stop at next match.
 		# (\s\bat\b|$) - Matches end of line, or if there is an location. Then it matches " at "
 		#$pattern = '/^.*an? (.*)\s\bby\b\s*(.*)(?=at|$)/';	
-		$pattern = '/^.*an? (.+)\s\bby\b\s*(.+?)(\sat|\z)/';	
+		$pattern = '/^.*drinking an? (.+)\s\bby\b\s*(.+?)(\sat|\z)/';
 
 		preg_match($pattern, $item->title, $matches);
 		
