@@ -1,6 +1,20 @@
 # suiram_org_api
 
 
+### Steam :video_game:
+**Usage:**
+```php
+// Id of game. 730=CS:GO, 240=CS:S, 440=TF2
+$app_id = "730";
+// Steam API Key https://steamcommunity.com/dev/apikey
+$api_key="1234567890ABCDEF1234567890ABCDEF";
+// Your Steam profile id
+$profile_id="700000000000000000";
+
+$userStatsForGame = new UserStatsForGame($app_id, $api_key, $profile_id);
+$userStatsForGame->serve();
+```
+
 ### Untappd :beer:
 
 **Usage:**
